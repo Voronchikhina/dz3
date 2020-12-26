@@ -1,0 +1,148 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+
+using namespace std;
+
+// стандартные операции
+double Proiz(double a, double b) {
+    return a * b;
+}
+
+double Del(double a, double b) {
+    return a / b;
+
+}
+
+double sum(double a, double b) {
+    return a + b;
+}
+
+double vichet(double a, double b) {
+    return a - b;
+}
+
+int main() {
+    unsigned int stp = 0;
+    string str;
+    string chislo;
+    vector<char> znak;
+    vector<double> ch;
+    vector<char> v;
+    cout << "Enter:  ";
+    cin >> str;
+    unsigned int l = 0;
+    // блок делящий начальную строку на вектор чисел и знаков
+    copy(str.begin(), str.end(), back_inserter(v));
+    //проверка на первое отрицательное число
+    if (v[0] == '-') {
+        l = 1;
+        v.erase(v.cbegin());
+    }
+    for (unsigned int i = 0; i < v.size(); i++) {
+        if ((v[i] == '+') || (v[i] == '-') || (v[i] == '*') || (v[i] == '/')) {
+            znak.push_back(v[i]);
+        } else {
+            chislo = chislo + v[i];
+            if (i != v.size() - 1) {
+                if ((v[i + 1] == '+') || (v[i + 1] == '-') || (v[i + 1] == '*') || (v[i + 1] == '/')) {
+                    double t = atof(chislo.c_str());
+                    ch.push_back(t);
+                    chislo.clear();
+                } else {
+                    chislo = chislo;
+                }
+            } else {
+                double t = atof(chislo.c_str());
+                ch.push_back(t);
+                chislo.clear();
+            }
+        }
+    }
+    if (l == 1) {
+        ch[0] = -ch[0];
+    }
+
+    //определяем главенство знаков
+    vector<int> Glav;
+    vector<int> neglav;
+    for (unsigned int i = 0; i < znak.size(); i++) {
+        if ((znak[i] == '*') || (znak[i] == '/')) {
+            Glav.push_back(i);
+        } else {
+            neglav.push_back(i);
+        }
+    }
+
+//начинаем выполнять действия
+    //начинаем с главенствующих знаков
+    for (unsigned int i = 0; i < Glav.size(); i++) {
+        unsigned int k = Glav[i];
+        if (znak[k] == '*') {
+            double x = Proiz(ch[k], ch[k + 1]);
+            ch[k] = x;
+            ch.erase(ch.begin() + k + 1);
+//при удаление будет менять позиция элементов в векторе. Учитываем это
+
+            for (unsigned int n = 0; n < neglav.size(); n++) {
+                if (k < neglav[n]) {
+                    neglav[n] = neglav[n] - 1;
+                }
+            }
+            for (unsigned int m = 0; m < Glav.size(); m++) {
+                Glav[m] = Glav[m] - 1;
+            }
+        }
+
+        if (znak[k] == '/') {
+            double x = Del(ch[k], ch[k + 1]);
+            ch[k] = x;
+            ch.erase(ch.begin() + k + 1);
+
+            //при удаление будет менять позиция элементов в векторе. Учитываем это
+            for (unsigned int n = 0; n < neglav.size(); n++) {
+                if (k < neglav[n]) {
+                    neglav[n] = neglav[n] - 1;
+                }
+            }
+            for (unsigned int m = 0; m < Glav.size(); m++) {
+                Glav[m] = Glav[m] - 1;
+            }
+        }
+
+        znak.erase(znak.cbegin() + k);
+    }
+
+
+    //второстепенные знаки
+    for (unsigned int i = 0; i < neglav.size(); i++) {
+        unsigned int q = neglav[i];
+        if (znak[q] == '+') {
+            double x = sum(ch[q], ch[q + 1]);
+            ch[q] = x;
+            ch.erase(ch.begin() + q + 1);
+            for (unsigned int m = 0; m < neglav.size(); m++) {
+                neglav[m] = neglav[m] - 1;
+            }
+
+        }
+        if ((znak[q] == '-') && (znak.size() != 0)) {
+            double x = vichet(ch[q], ch[q + 1]);
+            ch[q] = x;
+            ch.erase(ch.begin() + q + 1);
+            for (unsigned int m = 0; m < neglav.size(); m++) {
+                neglav[m] = neglav[m] - 1;
+
+            }
+        }
+
+        znak.erase(znak.cbegin() + q);
+    }
+
+
+    for (unsigned f = 0; f < ch.size(); f++) {
+        cout << "Result: " << ch[f] << endl;
+    }
+    return 0;
+}
